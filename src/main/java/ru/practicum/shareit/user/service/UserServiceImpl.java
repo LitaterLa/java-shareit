@@ -17,9 +17,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto create(NewUserRequest request) {
-//        if (request.getName() == null && request.getEmail() == null) {
-//            throw new ValidationException("Имейл и имя должны быть указаны");
-//        }
         User user = UserMapper.mapToUser(request);
         user = userRepository.create(user);
         return UserMapper.mapToUserDto(user);
