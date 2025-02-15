@@ -1,19 +1,15 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.user.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
-public class ItemDto {
+public class UserDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Integer id;
     String name;
-    String description;
-    Boolean available;
-    Integer ownerId;
+    String email;
 }
