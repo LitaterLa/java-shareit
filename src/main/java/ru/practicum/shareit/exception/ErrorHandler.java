@@ -15,7 +15,7 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
         log.warn("Ошибка: не найдено! {}", e.getMessage());
-        return new ErrorResponse("Пользователь не найден", e.getMessage());
+        return new ErrorResponse("Не найдено", e.getMessage());
     }
 
     @ExceptionHandler

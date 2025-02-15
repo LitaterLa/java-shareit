@@ -10,7 +10,10 @@ import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.service.UserService;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,9 +21,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
+    private final UserService userService;
 
     @Override
     public ItemDto create(NewItemRequest request, Integer ownerId) {
+        userService.get(ownerId);
         Item item = ItemMapper.mapToItem(ownerId, request);
         itemRepository.create(item);
         return ItemMapper.mapToDto(item);
@@ -30,7 +35,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(Integer itemId, UpdateItemRequest request, Integer ownerId) {
         Item item = itemRepository.get(itemId).orElseThrow(() -> new NotFoundException("item not found"));
         if (!(item.getOwnerId().equals(ownerId))) {
-            throw new ValidationException("Wrong owner ID");
+            throw new NotFoundException("Wrong owner ID");
         }
         return ItemMapper.mapToDto(itemRepository.update(ItemMapper.updateItem(item, request)));
     }
@@ -55,13 +60,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(String text) {
-        List<ItemDto> items = itemRepository.search(text).stream()
+        if (text.isBlank()) {
+            return Collections.emptyList();
+        }
+        return itemRepository.search(text).stream()
                 .map(ItemMapper::mapToDto)
                 .collect(Collectors.toList());
-        if (items.size() == 0) {
-            throw new NotFoundException("No matching search results");
-        }
-        return items;
     }
 
     @Override
