@@ -24,8 +24,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User update(User user) {
-        if (inMemoryUsers.values().stream().anyMatch(user1 -> user1.getEmail().equals(user.getEmail()))) {
-            throw new RuntimeException("User with the email already exists");
+        boolean emailExists = inMemoryUsers.values().stream()
+                .anyMatch(u -> u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId()));
+
+        if (emailExists) {
+            throw new RuntimeException("Duplicate email");
         }
         User newUser = inMemoryUsers.get(user.getId());
         if (user.getEmail() != null) {
