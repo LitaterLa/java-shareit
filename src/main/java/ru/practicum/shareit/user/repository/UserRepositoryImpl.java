@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.repository;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.ResourceConflictException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.HashMap;
@@ -15,7 +16,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User create(User user) {
         if (inMemoryUsers.values().stream().anyMatch(user1 -> user1.getEmail().equals(user.getEmail()))) {
-            throw new RuntimeException("User with the email already exists");
+            throw new ResourceConflictException("User with the email already exists");
         }
         user.setId(generateId());
         inMemoryUsers.put(user.getId(), user);
@@ -28,7 +29,7 @@ public class UserRepositoryImpl implements UserRepository {
                 .anyMatch(u -> u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId()));
 
         if (emailExists) {
-            throw new RuntimeException("Duplicate email");
+            throw new ResourceConflictException("Duplicate email");
         }
         User newUser = inMemoryUsers.get(user.getId());
         if (user.getEmail() != null) {
