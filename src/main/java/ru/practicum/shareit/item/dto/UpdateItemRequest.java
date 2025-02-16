@@ -1,19 +1,13 @@
 package ru.practicum.shareit.item.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
-public class ItemDto {
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    Integer id;
+public class UpdateItemRequest {
     String name;
     String description;
     Boolean available;
-    Integer ownerId;
 }
