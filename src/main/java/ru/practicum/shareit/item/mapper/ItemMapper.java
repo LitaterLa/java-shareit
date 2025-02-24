@@ -1,46 +1,25 @@
 package ru.practicum.shareit.item.mapper;
 
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.NewItemRequest;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.model.Item;
 
-public final class ItemMapper {
-    private ItemMapper() {
-    }
+@Component
+@Mapper(componentModel = "spring")
+public interface ItemMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "ownerId", source = "ownerId")
+    Item toItem(Integer ownerId, NewItemRequest itemRequest);
 
-    public static Item mapToItem(Integer ownerId, NewItemRequest request) {
-        return Item.builder()
-                .id(null)
-                .name(request.getName())
-                .description(request.getDescription())
-                .available(request.getAvailable())
-                .ownerId(ownerId)
-                .build();
-    }
+    ItemDto toItemDto(Item item);
 
-    public static ItemDto mapToDto(Item item) {
-        return ItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .ownerId(item.getOwnerId())
-                .build();
-    }
-
-    public static Item updateItem(Item item, UpdateItemRequest request) {
-        if (request.getName() != null) {
-            item.setName(request.getName());
-        }
-        if (request.getDescription() != null) {
-            item.setDescription(request.getDescription());
-        }
-        if (request.getAvailable() != null) {
-            item.setAvailable(request.getAvailable());
-        }
-        return item;
-    }
-
-
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    Item updateItem(UpdateItemRequest request, @MappingTarget Item item);
 }
