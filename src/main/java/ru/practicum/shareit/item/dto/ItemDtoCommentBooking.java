@@ -8,18 +8,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.booking.dto.BookingPeriod;
+import ru.practicum.shareit.item.CommentDto;
+
+import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
 @Getter
 @Setter
-public class ItemDto {
+@NoArgsConstructor
+@AllArgsConstructor
+public class ItemDtoCommentBooking {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     Integer id;
     String name;
     String description;
     Boolean available;
     Integer ownerId;
+    BookingPeriod lastBooking;
+    BookingPeriod nextBooking;
+    List<CommentDto> comments;
 }
+
