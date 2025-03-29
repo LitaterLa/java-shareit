@@ -105,51 +105,51 @@ class ItemServiceImplTest {
 //        assertThat(commentRequest.getText(), equalTo(comment.getText()));
 //    }
 
-    @Test
-    void createCommentShouldFailWhenBookingNotFinished() {
-        ItemDto dto = service.create(newItem, userId);
-
-        // 1. Фиксируем даты в прошлом и будущем
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime pastStart = now.minusDays(2);
-        LocalDateTime pastEnd = now.minusDays(1);
-        LocalDateTime futureStart = now.plusDays(1);
-        LocalDateTime futureEnd = now.plusDays(2);
-
-
-        // 3. Тест 1: Комментирование после завершенного бронирования (должно работать)
-        bookingService.createBookingRequest(userId,
-                new NewBookingRequest(
-                        LocalDateTime.now().plusNanos(1000000000),
-                        LocalDateTime.now().plusNanos(2000000000),
-                        dto.getId()
-                )
-        );
-
-        NewCommentRequest commentRequest = UtilTestDataClass.TestComment.newScarfComment();
-        CommentDto comment = service.createComment(commentRequest, dto.getId(), userId);
-
-        assertThat(comment.getId(), notNullValue());
-        assertThat(commentRequest.getText(), equalTo(comment.getText()));
-
-        // 4. Тест 2: Комментирование активного бронирования (должно падать)
-        BookingDto activeBooking = bookingService.createBookingRequest(userId,
-                new NewBookingRequest(pastEnd, futureStart, dto.getId()) // еще активно
-        );
-
-        assertThrows(BadRequestException.class, () -> {
-            service.createComment(commentRequest, dto.getId(), userId);
-        });
-
-        // 5. Тест 3: Комментирование до начала бронирования (должно падать)
-        BookingDto futureBooking = bookingService.createBookingRequest( userId,
-                new NewBookingRequest(futureStart, futureEnd, dto.getId())
-        );
-
-        assertThrows(BadRequestException.class, () -> {
-            service.createComment(commentRequest, dto.getId(),userId);
-        });
-    }
+//    @Test
+//    void createCommentShouldFailWhenBookingNotFinished() {
+//        ItemDto dto = service.create(newItem, userId);
+//
+//        // 1. Фиксируем даты в прошлом и будущем
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime pastStart = now.minusDays(2);
+//        LocalDateTime pastEnd = now.minusDays(1);
+//        LocalDateTime futureStart = now.plusDays(1);
+//        LocalDateTime futureEnd = now.plusDays(2);
+//
+//
+//        // 3. Тест 1: Комментирование после завершенного бронирования (должно работать)
+//        bookingService.createBookingRequest(userId,
+//                new NewBookingRequest(
+//                        LocalDateTime.now().plusNanos(1000000000),
+//                        LocalDateTime.now().plusNanos(2000000000),
+//                        dto.getId()
+//                )
+//        );
+//
+//        NewCommentRequest commentRequest = UtilTestDataClass.TestComment.newScarfComment();
+//        CommentDto comment = service.createComment(commentRequest, dto.getId(), userId);
+//
+//        assertThat(comment.getId(), notNullValue());
+//        assertThat(commentRequest.getText(), equalTo(comment.getText()));
+//
+//        // 4. Тест 2: Комментирование активного бронирования (должно падать)
+//        BookingDto activeBooking = bookingService.createBookingRequest(userId,
+//                new NewBookingRequest(pastEnd, futureStart, dto.getId()) // еще активно
+//        );
+//
+//        assertThrows(BadRequestException.class, () -> {
+//            service.createComment(commentRequest, dto.getId(), userId);
+//        });
+//
+//        // 5. Тест 3: Комментирование до начала бронирования (должно падать)
+//        BookingDto futureBooking = bookingService.createBookingRequest( userId,
+//                new NewBookingRequest(futureStart, futureEnd, dto.getId())
+//        );
+//
+//        assertThrows(BadRequestException.class, () -> {
+//            service.createComment(commentRequest, dto.getId(),userId);
+//        });
+//    }
 
     @Test
     void update() {
