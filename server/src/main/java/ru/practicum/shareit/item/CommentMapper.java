@@ -21,5 +21,5 @@ public interface CommentMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "created", source = "created")
     CommentDto toDto(Comment comment);
-    
+
 }
