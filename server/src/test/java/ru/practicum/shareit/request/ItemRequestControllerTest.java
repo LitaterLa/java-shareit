@@ -91,9 +91,9 @@ class ItemRequestControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id", is(dto.getId()), Integer.class))
                 .andExpect(jsonPath("$[0].description", is(dto.getDescription())))
-                .andExpect(jsonPath("$[0].created", is(dto.getCreated().toString())))
                 .andExpect(jsonPath("$[0].userId", is(dto.getUserId())))
-                .andExpect(jsonPath("$[0].items", is(dto.getItems())));
+                .andExpect(jsonPath("$[0].items", is(dto.getItems())))
+                .andExpect(jsonPath("$[0].created", is(dto.getCreated().toString())));
 
         verify(service).findUserRequests(userId);
     }

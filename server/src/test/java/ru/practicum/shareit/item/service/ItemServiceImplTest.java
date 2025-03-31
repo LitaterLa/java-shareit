@@ -9,12 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.UtilTestDataClass;
-import ru.practicum.shareit.booking.BookingService;
-import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.dto.NewBookingRequest;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.CommentDto;
+import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.NewCommentRequest;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoCommentBooking;
@@ -23,6 +22,7 @@ import ru.practicum.shareit.item.dto.UpdateItem;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
@@ -31,6 +31,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -42,7 +43,6 @@ class ItemServiceImplTest {
     private final EntityManager em;
     private final ItemService service;
     private final UserService userService;
-    private final BookingService bookingService;
 
     private NewUserRequest newUserRequest;
     private NewItemRequest newItem;
@@ -87,69 +87,34 @@ class ItemServiceImplTest {
         });
     }
 
-//    @Test
-//    void createComment_shouldFailWhenBookingNotFinished() throws InterruptedException {
-//        ItemDto dto = service.create(newItem, userId);
-//        bookingService.createBookingRequest(userId,
-//                new NewBookingRequest(
-//                        LocalDateTime.now().plusNanos(1000000000),
-//                        LocalDateTime.now().plusNanos(2000000000),
-//                        dto.getId()
-//                )
-//        );
-//        Thread.sleep(5000);
-//        NewCommentRequest commentRequest = UtilTestDataClass.TestComment.newScarfComment();
-//        CommentDto comment = service.createComment(commentRequest, dto.getId(), userId);
-//
-//        assertThat(comment.getId(), notNullValue());
-//        assertThat(commentRequest.getText(), equalTo(comment.getText()));
-//    }
+    @Test
+    void createComment() {
+        newUserRequest.setEmail("newer@email.com");
+        UserDto user = userService.create(newUserRequest);
+        int userId = user.getId();
+        ItemDto item = service.create(newItem, userId);
+        int itemId = item.getId();
+        Booking booking = Booking.builder()
+                .start(LocalDateTime.now().minusDays(2))
+                .end(LocalDateTime.now().minusDays(1))
+                .item(em.find(Item.class, itemId))
+                .booker(em.find(User.class, userId))
+                .status(Status.APPROVED)
+                .build();
+        em.persist(booking);
 
-//    @Test
-//    void createCommentShouldFailWhenBookingNotFinished() {
-//        ItemDto dto = service.create(newItem, userId);
-//
-//        // 1. Фиксируем даты в прошлом и будущем
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime pastStart = now.minusDays(2);
-//        LocalDateTime pastEnd = now.minusDays(1);
-//        LocalDateTime futureStart = now.plusDays(1);
-//        LocalDateTime futureEnd = now.plusDays(2);
-//
-//
-//        // 3. Тест 1: Комментирование после завершенного бронирования (должно работать)
-//        bookingService.createBookingRequest(userId,
-//                new NewBookingRequest(
-//                        LocalDateTime.now().plusNanos(1000000000),
-//                        LocalDateTime.now().plusNanos(2000000000),
-//                        dto.getId()
-//                )
-//        );
-//
-//        NewCommentRequest commentRequest = UtilTestDataClass.TestComment.newScarfComment();
-//        CommentDto comment = service.createComment(commentRequest, dto.getId(), userId);
-//
-//        assertThat(comment.getId(), notNullValue());
-//        assertThat(commentRequest.getText(), equalTo(comment.getText()));
-//
-//        // 4. Тест 2: Комментирование активного бронирования (должно падать)
-//        BookingDto activeBooking = bookingService.createBookingRequest(userId,
-//                new NewBookingRequest(pastEnd, futureStart, dto.getId()) // еще активно
-//        );
-//
-//        assertThrows(BadRequestException.class, () -> {
-//            service.createComment(commentRequest, dto.getId(), userId);
-//        });
-//
-//        // 5. Тест 3: Комментирование до начала бронирования (должно падать)
-//        BookingDto futureBooking = bookingService.createBookingRequest( userId,
-//                new NewBookingRequest(futureStart, futureEnd, dto.getId())
-//        );
-//
-//        assertThrows(BadRequestException.class, () -> {
-//            service.createComment(commentRequest, dto.getId(),userId);
-//        });
-//    }
+        service.createComment(newComment, itemId, userId);
+
+        TypedQuery<Comment> query = em.createQuery("Select c from Comment c where c.text = :text",
+                Comment.class);
+        Comment comment = query.setParameter("text", newComment.getText())
+                .getSingleResult();
+
+        assertThat(comment.getId(), notNullValue());
+        assertThat(comment.getAuthor().getId(), equalTo(userId));
+        assertThat(comment.getText(), equalTo(newComment.getText()));
+    }
+
 
     @Test
     void update() {
@@ -164,6 +129,13 @@ class ItemServiceImplTest {
         assertThat(item.getDescription(), equalTo(updateItem.getDescription()));
         assertThat(item.getAvailable(), equalTo(updateItem.getAvailable()));
 
+    }
+
+    @Test
+    void update_FailWrongUser() {
+        UserDto sneaky = userService.create(NewUserRequest.builder().name("rnd").email("rnd@email.com").build());
+        ItemDto dto = service.create(newItem, userId);
+        assertThrows(NotFoundException.class, () -> service.update(dto.getId(), updateItem, sneaky.getId()));
     }
 
     @Test
@@ -184,6 +156,36 @@ class ItemServiceImplTest {
     }
 
     @Test
+    void addCommentWithoutBookingTest() {
+        newUserRequest.setEmail("new@email.com");
+        UserDto user = userService.create(newUserRequest);
+        int userId = user.getId();
+        ItemDto item = service.create(newItem, userId);
+        int itemId = item.getId();
+
+        assertThrows(Exception.class, () -> service.createComment(newComment, userId, itemId));
+    }
+
+    @Test
+    void addCommentWithoutItemTest() {
+        newUserRequest.setEmail("new@email.com");
+        UserDto user = userService.create(newUserRequest);
+        ItemDto item = service.create(newItem, userId);
+        int userId = user.getId();
+        int itemId = item.getId();
+
+        assertThrows(NotFoundException.class, () -> service.createComment(newComment, userId, itemId));
+    }
+
+    @Test
+    void addCommentWithoutUserTest() {
+        int userId = userDto.getId();
+        ItemDto item = service.create(newItem, userId);
+        int itemId = item.getId();
+        assertThrows(NotFoundException.class, () -> service.createComment(newComment, userId, itemId));
+    }
+
+    @Test
     void getUserItems() {
         ItemDto dto = service.create(newItem, userId);
         List<ItemDtoCommentBooking> itemsAll = service.getUserItems(userId);
@@ -197,6 +199,12 @@ class ItemServiceImplTest {
         assertThat(items.getFirst().getAvailable(), equalTo(itemsAll.getFirst().getAvailable()));
         assertThat(items.getFirst().getRequestId(), equalTo(itemsAll.getFirst().getRequestId()));
         assertThat(items.getFirst().getOwner().getId(), equalTo(itemsAll.getFirst().getOwnerId()));
+    }
+
+    @Test
+    void getUserItems_Fail() {
+        UserDto sneaky = userService.create(NewUserRequest.builder().name("rnd").email("rnd@email.com").build());
+        assertThrows(NotFoundException.class, () -> service.getUserItems(sneaky.getId()));
     }
 
     @Test
@@ -226,6 +234,9 @@ class ItemServiceImplTest {
 
     @Test
     void searchAvailable() {
+        List<ItemDto> emptyResult = service.search("", 0, 5);
+        assertThat(emptyResult, hasSize(0));
+
         ItemDto dto = service.create(newItem, userId);
         List<ItemDto> result = service.search("scarf", 0, 5);
 

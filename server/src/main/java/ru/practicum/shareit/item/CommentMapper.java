@@ -19,15 +19,7 @@ public interface CommentMapper {
     @Mapping(target = "authorName", source = "author.name")
     @Mapping(target = "itemId", source = "item.id")
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "created", source = "created")//, qualifiedByName = "instantToString")
+    @Mapping(target = "created", source = "created")
     CommentDto toDto(Comment comment);
-
-
-//    @Named("instantToString")
-//    default String instantToString(Instant instant) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.of("UTC"));
-//        return formatter.format(instant);
-//    }
-
-
+    
 }

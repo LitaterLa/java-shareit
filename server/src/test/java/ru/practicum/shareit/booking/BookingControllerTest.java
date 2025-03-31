@@ -16,7 +16,6 @@ import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.booking.dto.UpdateBookingRequest;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
@@ -27,9 +26,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,19 +43,12 @@ class BookingControllerTest {
 
     @MockBean
     private final BookingService service;
-
-    private NewBookingRequest newRequest;
     private BookingDto dto;
     private UpdateBookingRequest update;
     private List<BookingDto> bookings;
 
     @BeforeEach
     void setUp() {
-        newRequest = NewBookingRequest.builder()
-                .itemId(1)
-                .start(LocalDateTime.of(2025, 1, 1, 10, 0))
-                .end(LocalDateTime.of(2025, 1, 5, 12, 0))
-                .build();
         dto = UtilTestDataClass.TestBooking.approvedBeretBooking();
         update = new UpdateBookingRequest();
         update.setStatus("APPROVED");
@@ -143,7 +135,7 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].status", is(dto.getStatus())));
 
 
-        verify(service).findAllByUserId(userId,"ALL");
+        verify(service).findAllByUserId(userId, "ALL");
     }
 
     @Test
@@ -161,6 +153,6 @@ class BookingControllerTest {
                 .andExpect(jsonPath("$[0].status", is(dto.getStatus())));
 
 
-        verify(service).findAllByUserId(userId,"ALL");
+        verify(service).findAllByUserId(userId, "ALL");
     }
 }

@@ -24,7 +24,7 @@ class ItemDtoJsonTest {
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(2);
         assertThat(result).extractingJsonPathStringValue("$.name").isEqualTo("scarf");
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("a cashmere scarf");
-        assertThat(result).extractingJsonPathBooleanValue("$.available").isEqualTo(false);
+        assertThat(result).extractingJsonPathBooleanValue("$.available").isEqualTo(true);
         assertThat(result).extractingJsonPathNumberValue("$.ownerId").isEqualTo(2);
 
     }

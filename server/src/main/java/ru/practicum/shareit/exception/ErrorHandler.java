@@ -33,20 +33,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final ValidationException e) {
-        log.warn("Validation exception: {}", e.getMessage());
-        return new ErrorResponse("Validation exc", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleResourceConflictException(final ResourceConflictException e) {
-        log.warn("Given resource has conflict with an already-existing one");
-        return new ErrorResponse("Conflict exc", e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleIllegalAccessException(final java.lang.IllegalAccessException e) {
         log.warn("Not the item's owner");

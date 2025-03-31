@@ -23,7 +23,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
                                                            @Param("itemId") Integer itemId,
                                                            @Param("now") LocalDateTime now);
 
-    @Query("select b from Booking b JOIN FETCH b.item i WHERE i.owner.id = :ownerId order by start desc")
+    @Query("SELECT b FROM Booking b JOIN FETCH b.item i WHERE i.owner.id = :ownerId ORDER BY b.start DESC")
     List<Booking> findAllByItemOwnerId(@Param("ownerId") Integer ownerId);
 
     @Query("SELECT new ru.practicum.shareit.booking.dto.BookingPeriod(b.start, b.end) " +
@@ -33,7 +33,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     @Query("SELECT new ru.practicum.shareit.booking.dto.BookingPeriod(b.start, b.end) " +
             "FROM Booking b WHERE b.item.id = :itemId AND b.end < :now ORDER BY b.end DESC")
     Optional<BookingPeriod> findLastBookingByItemId(@Param("itemId") Integer itemId, @Param("now") LocalDateTime now);
-
 
     List<Booking> findByItemIdIn(List<Integer> itemIds);
 }

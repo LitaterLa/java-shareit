@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto update(Integer id, UpdateUserRequest user) {
         User updated = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь " + id + " не найден"));
         userMapper.updateUserFields(user, updated);
         userRepository.save(updated);
         return userMapper.toUserDto(updated);
@@ -40,13 +40,13 @@ public class UserServiceImpl implements UserService {
     public UserDto get(Integer id) {
         return userRepository.findById(id)
                 .map(userMapper::toUserDto)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new NotFoundException("Пользователь " + id + " не найден"));
     }
 
     @Override
     @Transactional
     public void delete(Integer userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь " + userId + "не найден"));
         userRepository.delete(user);
     }
 }

@@ -19,14 +19,14 @@ public interface BookingMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", constant = "WAITING")
     @Mapping(target = "item", source = "item")
-    @Mapping(target = "start", source = "bookingRequest.start")//, qualifiedByName = "parseDateTime")
-    @Mapping(target = "end", source = "bookingRequest.end")//, qualifiedByName = "parseDateTime")
+    @Mapping(target = "start", source = "bookingRequest.start")
+    @Mapping(target = "end", source = "bookingRequest.end")
     @Mapping(target = "booker", source = "booker")
     Booking toBooking(User booker, Item item, NewBookingRequest bookingRequest);
 
     @Mapping(target = "id", source = "id")
-    @Mapping(target = "start", source = "start")//, qualifiedByName = "formatDateTime")
-    @Mapping(target = "end", source = "end")//, qualifiedByName = "formatDateTime")
+    @Mapping(target = "start", source = "start")
+    @Mapping(target = "end", source = "end")
     @Mapping(target = "booker", source = "booker", qualifiedByName = "customMapUser")
     @Mapping(target = "item", source = "item", qualifiedByName = "customMapItem")
     @Mapping(target = "status", source = "status")
@@ -38,10 +38,9 @@ public interface BookingMapper {
             return null;
         }
         Hibernate.initialize(item);
-        return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(), item.getRequestId(),
-                item.getOwner().getId());
+        return new ItemDto(item.getId(), item.getName(), item.getDescription(), item.getAvailable(),
+                item.getOwner().getId(), item.getRequestId());
     }
-
 
     @Named("customMapUser")
     default User customMapUser(User user) {
@@ -49,26 +48,8 @@ public interface BookingMapper {
             return null;
         }
         Hibernate.initialize(user);
-        return new User(user.getId(), user.getName(), user.getEmail());
+        return user;
     }
-//
-//    @Named("formatDateTime")
-//    default String formatDateTime(LocalDateTime dateTime) {
-//        if (dateTime == null) {
-//            return null;
-//        }
-//        return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-//    }
-//
-//    @Named("parseDateTime")
-//    default LocalDateTime parseDateTime(String dateTimeString) {
-//        if (dateTimeString == null) {
-//            return null;
-//        }
-//        return LocalDateTime.parse(dateTimeString,
-//                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-//        );
-//    }
 
 }
 

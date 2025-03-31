@@ -24,7 +24,7 @@ class ItemRequestDtoTest {
         assertThat(result).extractingJsonPathNumberValue("$.id").isEqualTo(1);
         assertThat(result).extractingJsonPathStringValue("$.description").isEqualTo("of great beauty");
         assertThat(result).extractingJsonPathNumberValue("$.userId").isEqualTo(1);
-        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo("2025-03-25");
+        assertThat(result).extractingJsonPathStringValue("$.created").isEqualTo("2025-03-29T23:15");
 
 
     }

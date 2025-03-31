@@ -2,6 +2,7 @@ package ru.practicum.shareit;
 
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingPeriod;
+import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.item.CommentDto;
 import ru.practicum.shareit.item.NewCommentRequest;
 import ru.practicum.shareit.item.dto.ItemCommentDto;
@@ -10,6 +11,7 @@ import ru.practicum.shareit.item.dto.ItemDtoCommentBooking;
 import ru.practicum.shareit.item.dto.NewItemRequest;
 import ru.practicum.shareit.item.dto.UpdateItem;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.NewItemRequestDto;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -58,16 +60,20 @@ public class UtilTestDataClass {
                     .id(1)
                     .description("of great beauty")
                     .userId(TestUser.paris().getId())
-                    .created(LocalDateTime.now().minusDays(2))
+                    .created(LocalDateTime.of(2025, 03, 29, 23, 15))
                     .build();
         }
 
-        public static ItemRequestDto tasteRequest() {
-            return ItemRequestDto.builder()
-                    .id(2)
+
+        public static NewItemRequestDto newTasteRequest() {
+            return NewItemRequestDto.builder()
                     .description("of great taste")
-                    .userId(TestUser.rome().getId())
-                    .created(LocalDateTime.now().minusDays(1))
+                    .build();
+        }
+
+        public static NewItemRequestDto newBeautyRequest() {
+            return NewItemRequestDto.builder()
+                    .description("of great beauty")
                     .build();
         }
     }
@@ -197,7 +203,7 @@ public class UtilTestDataClass {
                     .id(2)
                     .name("scarf")
                     .description("a cashmere scarf")
-                    .available(false)
+                    .available(true)
                     .ownerId(TestUser.rome().getId())
                     .build();
         }
@@ -212,6 +218,14 @@ public class UtilTestDataClass {
                     .item(TestItem.beret())
                     .status("APPROVED")
                     .booker(TestUser.rome())
+                    .build();
+        }
+
+        public static NewBookingRequest newBookingRequest() {
+            return NewBookingRequest.builder()
+                    .start(LocalDateTime.now().plusMinutes(1))
+                    .end(LocalDateTime.now().plusHours(1))
+                    .itemId(TestItem.beret().getId())
                     .build();
         }
 
