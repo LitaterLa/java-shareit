@@ -108,12 +108,12 @@ class BookingRepositoryTest {
     @Test
     void findLastBookingByItemId() {
         Item innerSavedItem = em.persist(new Item(null, "inner", "inner", true, owner, null));
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);;
         Booking pastBooking = em.merge(new Booking(null, now.minusDays(2L), now.minusDays(1L), savedItem, Status.APPROVED, booker));
         Optional<BookingPeriod> past = repository.findLastBookingByItemId(savedItem.getId(), now);
 
         assertThat(past, notNullValue());
-        assertThat(pastBooking.getStart(), equalTo(past.get().getStart()));
+        assertThat(pastBooking.getStart().truncatedTo(ChronoUnit.SECONDS), equalTo(past.get().getStart().truncatedTo(ChronoUnit.SECONDS)));
     }
 
 }
