@@ -22,6 +22,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,19 +60,27 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void createBookingRequest() {
-        BookingDto request = service.createBookingRequest(bookerId, newBooking);
+    @Transactional
+    void createBookingRequest_shouldCreateAndReturnBooking() {
+        NewBookingRequest bookingRequest = new NewBookingRequest(
+                LocalDateTime.now().plusDays(1).truncatedTo(ChronoUnit.SECONDS),
+                LocalDateTime.now().plusDays(2).truncatedTo(ChronoUnit.SECONDS),
+                item.getId()
+        );
 
-        TypedQuery<Booking> query = em.createQuery("select b from Booking b where b.start = :start", Booking.class);
-        Booking booking = query.setParameter("start", newBooking.getStart()).getSingleResult();
+        BookingDto response = service.createBookingRequest(bookerId, bookingRequest);
 
-        assertThat(request.getId(), notNullValue());
-        assertThat(booking.getBooker().getId(), equalTo(request.getBooker().getId()));
-        assertThat(booking.getItem().getId(), equalTo(request.getItem().getId()));
-        assertThat(booking.getStatus().toString(), equalTo(request.getStatus()));
-        assertThat(booking.getStart(), equalTo(request.getStart()));
-        assertThat(booking.getEnd(), equalTo(request.getEnd()));
+        assertThat(response.getId(), notNullValue());
+        assertThat(response.getStart(), equalTo(bookingRequest.getStart()));
+        assertThat(response.getEnd(), equalTo(bookingRequest.getEnd()));
+        assertThat(response.getStatus(), equalTo("WAITING"));
 
+        em.flush();
+
+        Booking dbBooking = em.find(Booking.class, response.getId());
+        assertThat(dbBooking, notNullValue());
+        assertThat(dbBooking.getBooker().getId(), equalTo(bookerId));
+        assertThat(dbBooking.getItem().getId(), equalTo(item.getId()));
     }
 
     @Test

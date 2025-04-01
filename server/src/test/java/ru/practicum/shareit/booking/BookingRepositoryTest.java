@@ -11,6 +11,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +35,7 @@ class BookingRepositoryTest {
 
     @BeforeEach
     void setUp() {
+
         owner = em.persist(new User(null, "User1", "user1@email.com"));
         booker = em.persist(new User(null, "User2", "user2@email.com"));
         savedItem = em.persist(new Item(null, "laptop", "powerful laptop", true, owner, null));
@@ -81,15 +83,31 @@ class BookingRepositoryTest {
 
     @Test
     void findNextBookingByItemId() {
-        LocalDateTime now = LocalDateTime.now();
-        Optional<BookingPeriod> next = repository.findNextBookingByItemId(savedItem.getId(), now);
+        Item innerSavedItem = em.persist(new Item(null, "inner", "inner", true, owner, null));
 
-        assertThat(next, notNullValue());
-        assertThat(savedBooking.getStart(), equalTo(next.get().getStart()));
+        LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+        Booking booking = em.merge(new Booking(
+                null,
+                now.plusHours(1),
+                now.plusHours(2),
+                innerSavedItem,
+                Status.APPROVED,
+                booker
+        ));
+        em.flush();
+
+        Optional<BookingPeriod> next = repository.findNextBookingByItemId(innerSavedItem.getId(), now);
+
+        assertThat(next.isPresent(), equalTo(true));
+        assertThat(
+                next.get().getStart().truncatedTo(ChronoUnit.SECONDS),
+                equalTo(booking.getStart().truncatedTo(ChronoUnit.SECONDS))
+        );
     }
 
     @Test
     void findLastBookingByItemId() {
+        Item innerSavedItem = em.persist(new Item(null, "inner", "inner", true, owner, null));
         LocalDateTime now = LocalDateTime.now();
         Booking pastBooking = em.merge(new Booking(null, now.minusDays(2L), now.minusDays(1L), savedItem, Status.APPROVED, booker));
         Optional<BookingPeriod> past = repository.findLastBookingByItemId(savedItem.getId(), now);

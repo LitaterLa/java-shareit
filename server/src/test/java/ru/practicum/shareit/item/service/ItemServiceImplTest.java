@@ -179,8 +179,8 @@ class ItemServiceImplTest {
 
     @Test
     void addCommentWithoutUserTest() {
-        int userId = userDto.getId();
-        ItemDto item = service.create(newItem, userId);
+        int userId = 999;
+        ItemDto item = service.create(newItem, userDto.getId());
         int itemId = item.getId();
         assertThrows(NotFoundException.class, () -> service.createComment(newComment, userId, itemId));
     }
