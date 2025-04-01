@@ -9,8 +9,14 @@ import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingPeriod;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
-import ru.practicum.shareit.item.*;
-import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.Comment;
+import ru.practicum.shareit.item.CommentDto;
+import ru.practicum.shareit.item.CommentMapper;
+import ru.practicum.shareit.item.NewCommentRequest;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoCommentBooking;
+import ru.practicum.shareit.item.dto.NewItemRequest;
+import ru.practicum.shareit.item.dto.UpdateItem;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequest;
@@ -18,6 +24,7 @@ import ru.practicum.shareit.request.ItemRequestMapper;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.NewItemRequestDto;
 import ru.practicum.shareit.user.dto.NewUserRequest;
+import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -26,7 +33,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
@@ -44,23 +53,120 @@ class MappersTest {
     private UserMapper userMapper;
 
     // UserMapper tests
+
     @Test
-    void userMapper_ShouldMapCorrectly() {
-        NewUserRequest newUserRequest = new NewUserRequest("name", "email@test.com");
-        User user = userMapper.toUser(newUserRequest);
+    void usersMapper_ShouldMapCorrectly() {
+        toUserDto_ShouldMapAllFields();
+        toUserDto_ShouldReturnNullForNullInput();
+        toUserFromNewRequest_ShouldMapAllFields();
+        toUserFromNewRequest_ShouldReturnNullForNullInput();
+        toUserFromDto_ShouldMapAllFields();
+        toUserFromDto_ShouldReturnNullForNullInput();
+        updateUserFields_ShouldUpdateNonNullFields();
+        updateUserFields_ShouldNotUpdateNullFields();
+        updateUserFields_ShouldDoNothingForNullRequest();
+    }
+
+    private void toUserDto_ShouldMapAllFields() {
+        User user = User.builder()
+                .id(1)
+                .name("Test User")
+                .email("test@test.com")
+                .build();
+
+        UserDto dto = userMapper.toUserDto(user);
 
         assertAll(
-                () -> assertThat(user, notNullValue()),
-                () -> assertThat(user.getName(), equalTo("name")),
-                () -> assertThat(user.getEmail(), equalTo("email@test.com"))
-        );
-
-        UserDto userDto = userMapper.toUserDto(user);
-        assertAll(
-                () -> assertThat(userDto.getName(), equalTo(user.getName())),
-                () -> assertThat(userDto.getEmail(), equalTo(user.getEmail()))
+                () -> assertThat(dto.getId(), equalTo(user.getId())),
+                () -> assertThat(dto.getName(), equalTo(user.getName())),
+                () -> assertThat(dto.getEmail(), equalTo(user.getEmail()))
         );
     }
+
+    private void toUserDto_ShouldReturnNullForNullInput() {
+        assertThat(userMapper.toUserDto(null), nullValue());
+    }
+
+    private void toUserFromNewRequest_ShouldMapAllFields() {
+        NewUserRequest request = new NewUserRequest("New User", "new@test.com");
+
+        User user = userMapper.toUser(request);
+
+        assertAll(
+                () -> assertThat(user.getName(), equalTo(request.getName())),
+                () -> assertThat(user.getEmail(), equalTo(request.getEmail())),
+                () -> assertThat(user.getId(), nullValue())
+        );
+    }
+
+    private void toUserFromNewRequest_ShouldReturnNullForNullInput() {
+        assertThat(userMapper.toUser((NewUserRequest) null), nullValue());
+    }
+
+    private void toUserFromDto_ShouldMapAllFields() {
+        UserDto dto = new UserDto(1, "Dto User", "dto@test.com");
+
+        User user = userMapper.toUser(dto);
+
+        assertAll(
+                () -> assertThat(user.getId(), equalTo(dto.getId())),
+                () -> assertThat(user.getName(), equalTo(dto.getName())),
+                () -> assertThat(user.getEmail(), equalTo(dto.getEmail()))
+        );
+    }
+
+    private void toUserFromDto_ShouldReturnNullForNullInput() {
+        assertThat(userMapper.toUser((UserDto) null), nullValue());
+    }
+
+
+    private void updateUserFields_ShouldUpdateNonNullFields() {
+        User user = User.builder()
+                .id(1)
+                .name("Original")
+                .email("original@test.com")
+                .build();
+
+        UpdateUserRequest update = new UpdateUserRequest("Updated", "updated@test.com");
+        userMapper.updateUserFields(update, user);
+
+        assertAll(
+                () -> assertThat(user.getName(), equalTo("Updated")),
+                () -> assertThat(user.getEmail(), equalTo("updated@test.com"))
+        );
+    }
+
+    private void updateUserFields_ShouldNotUpdateNullFields() {
+        User user = User.builder()
+                .id(1)
+                .name("Original")
+                .email("original@test.com")
+                .build();
+
+        UpdateUserRequest partialUpdate = new UpdateUserRequest(null, "updated@test.com");
+        userMapper.updateUserFields(partialUpdate, user);
+
+        assertAll(
+                () -> assertThat(user.getName(), equalTo("Original")),
+                () -> assertThat(user.getEmail(), equalTo("updated@test.com"))
+        );
+    }
+
+    private void updateUserFields_ShouldDoNothingForNullRequest() {
+        User user = User.builder()
+                .id(1)
+                .name("Original")
+                .email("original@test.com")
+                .build();
+
+        userMapper.updateUserFields(null, user);
+
+        assertAll(
+                () -> assertThat(user.getName(), equalTo("Original")),
+                () -> assertThat(user.getEmail(), equalTo("original@test.com"))
+        );
+    }
+
 
     // ItemMapper tests
     @Test
