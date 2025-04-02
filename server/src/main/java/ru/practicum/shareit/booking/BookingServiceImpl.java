@@ -18,6 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
@@ -67,7 +68,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public BookingDto findById(Integer id, Integer userId) {
         Booking booking = bookingRepository.findById(id).orElseThrow(() -> new NotFoundException("Booking id " + id + " not found"));
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
@@ -77,7 +77,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> findAllByUserId(Integer userId, String state) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Booker with id " + userId + " not found"));
         try {
@@ -93,7 +92,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<BookingDto> findAllByOwnerId(Integer ownerId, String state) {
         userRepository.findById(ownerId).orElseThrow(() -> new NotFoundException("Owner with id " + ownerId + " not found"));
 

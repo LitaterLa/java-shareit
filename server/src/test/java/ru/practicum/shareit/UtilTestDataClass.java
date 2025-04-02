@@ -5,7 +5,6 @@ import ru.practicum.shareit.booking.dto.BookingPeriod;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.item.CommentDto;
 import ru.practicum.shareit.item.NewCommentRequest;
-import ru.practicum.shareit.item.dto.ItemCommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoCommentBooking;
 import ru.practicum.shareit.item.dto.NewItemRequest;
@@ -76,27 +75,6 @@ public class UtilTestDataClass {
                     .description("of great beauty")
                     .build();
         }
-    }
-
-    public static class TestItemComment {
-        public static ItemCommentDto itemWithComments() {
-            return ItemCommentDto.builder()
-                    .id(1)
-                    .name("Test Item")
-                    .description("Test Description")
-                    .available(true)
-                    .ownerId(1)
-                    .requestId(null)
-                    .comments(List.of(
-                            CommentDto.builder()
-                                    .id(1)
-                                    .text("First comment")
-                                    .authorName("User1")
-                                    .created("2023-01-01T10:00:00Z")
-                                    .build()))
-                    .build();
-        }
-
     }
 
 

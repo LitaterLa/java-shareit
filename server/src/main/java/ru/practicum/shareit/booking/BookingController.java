@@ -22,11 +22,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class BookingController {
+    private static final String HEADER = "X-Sharer-User-Id";
     private final BookingService bookingService;
 
     @PostMapping
     public BookingDto createBookingRequest(@RequestBody NewBookingRequest booking,
-                                           @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
+                                           @RequestHeader(HEADER) Integer bookerId) {
         log.info("Creating new booking itemId {}", booking.getItemId());
         log.info("Creating new booking item start{}", booking.getStart());
         log.info("Creating new booking item start{}", booking.getEnd());
@@ -35,7 +36,7 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public BookingDto processBookingRequest(@PathVariable Integer bookingId,
-                                            @RequestHeader("X-Sharer-User-Id") Integer ownerId,
+                                            @RequestHeader(HEADER) Integer ownerId,
                                             @RequestParam("approved") Boolean processable) {
         log.info("Processing booking id{}", bookingId);
         return bookingService.updateBookingStatus(bookingId, ownerId, processable);
@@ -43,20 +44,20 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public BookingDto findById(@PathVariable Integer bookingId,
-                               @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                               @RequestHeader(HEADER) Integer userId) {
         log.info("Looking for booking id{}", bookingId);
         return bookingService.findById(bookingId, userId);
     }
 
     @GetMapping
-    public List<BookingDto> findAllByUserId(@RequestHeader("X-Sharer-User-Id") Integer userId,
+    public List<BookingDto> findAllByUserId(@RequestHeader(HEADER) Integer userId,
                                             @RequestParam(value = "status", defaultValue = "ALL") String state) {
         log.info("Looking for booking made by user{}", userId);
         return bookingService.findAllByUserId(userId, state);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> findAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Integer ownerId,
+    public List<BookingDto> findAllByOwnerId(@RequestHeader(HEADER) Integer ownerId,
                                              @RequestParam(value = "status", defaultValue = "ALL") String state) {
         log.info("Looking for booking items owned by user{}", ownerId);
         return bookingService.findAllByOwnerId(ownerId, state);

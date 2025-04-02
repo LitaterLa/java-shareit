@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository repository;
@@ -42,14 +43,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemRequestDto> findUserRequests(Integer userId) {
         List<ItemRequest> itemRequests = repository.findAllByUserId(userId);
         return toListItemRequestDto(itemRequests);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemRequestDto> findAll(Integer userId, Integer from, Integer size) {
         PageRequest pageable = PageRequest.of(from, size, Sort.by("created").descending());
         List<ItemRequest> itemRequests = repository.findByUserIdNot(userId, pageable);
@@ -57,7 +56,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ItemRequestDto getRequestById(Integer id) {
         ItemRequest itemRequest = repository.findById(id).orElseThrow(() -> new NotFoundException("Not found item request id " + id));
         List<Item> items = itemRepository.findAllByRequestId(id);
@@ -68,6 +66,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     @Transactional
     public void deleteItemRequest(Integer id) {
+        repository.findById(id).orElseThrow(() -> new NotFoundException("Not found item request id=" + id));
         repository.deleteById(id);
     }
 

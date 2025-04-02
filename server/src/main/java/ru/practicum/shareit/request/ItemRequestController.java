@@ -23,23 +23,24 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class ItemRequestController {
+    private static final String HEADER = "X-Sharer-User-Id";
     private final ItemRequestService itemRequestService;
 
     @PostMapping
     public ItemRequestDto create(@RequestBody NewItemRequestDto dto,
-                                 @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                 @RequestHeader(HEADER) Integer userId) {
         log.info("creating new item request for user{}", userId);
         return itemRequestService.create(dto, userId);
     }
 
     @GetMapping
-    public List<ItemRequestDto> findUserRequests(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public List<ItemRequestDto> findUserRequests(@RequestHeader(HEADER) Integer userId) {
         log.info("finding item requests for user{}", userId);
         return itemRequestService.findUserRequests(userId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto> findAllOtherUsers(@RequestHeader("X-Sharer-User-Id") Integer userId,
+    public List<ItemRequestDto> findAllOtherUsers(@RequestHeader(HEADER) Integer userId,
                                                   @RequestParam(defaultValue = "0") Integer from,
                                                   @RequestParam(defaultValue = "15") Integer size) {
         log.info("finding all item requests");

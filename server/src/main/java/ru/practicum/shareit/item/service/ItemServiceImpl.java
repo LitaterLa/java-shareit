@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 public class ItemServiceImpl implements ItemService {
@@ -75,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
         return commentMapper.toDto(comment);
     }
 
-
+    @Transactional
     @Override
     public ItemDto update(Integer itemId, UpdateItem request, Integer ownerId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("item not found"));
@@ -86,7 +87,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public ItemDtoCommentBooking get(Integer itemId, Integer userId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("item not found"));
         BookingPeriod next = null;
@@ -100,7 +100,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDtoCommentBooking> getUserItems(Integer userId) {
         List<Item> items = itemRepository.findAllByOwnerId(userId);
         if (items.isEmpty()) {
@@ -140,7 +139,6 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
-    @Transactional(readOnly = true)
     public List<ItemDto> search(String text, int from, int size) {
         if (text.isBlank()) {
             return Collections.emptyList();
@@ -153,6 +151,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public void delete(Integer id) {
         Item item = itemRepository.findById(id).orElseThrow(() -> new NotFoundException("Item to delete was not found"));
         itemRepository.delete(item);

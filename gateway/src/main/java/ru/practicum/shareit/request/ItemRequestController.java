@@ -22,23 +22,24 @@ import ru.practicum.shareit.request.dto.NewItemRequestDto;
 @Slf4j
 @RequiredArgsConstructor
 public class ItemRequestController {
+    private static final String HEADER = "X-Sharer-User-Id";
     private final ItemRequestClient client;
 
     @PostMapping
     public ResponseEntity<Object> createRequest(@RequestBody NewItemRequestDto dto,
-                                         @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                                @RequestHeader(HEADER) Integer userId) {
         log.info("creating new item request for user{}", userId);
         return client.create(dto, userId);
     }
 
     @GetMapping
-    public ResponseEntity<Object> findUserRequests(@RequestHeader("X-Sharer-User-Id") Integer userId) {
+    public ResponseEntity<Object> findUserRequests(@RequestHeader(HEADER) Integer userId) {
         log.info("finding item requests for user{}", userId);
         return client.getUserRequests(userId);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Object> findAllOtherUsers(@RequestHeader("X-Sharer-User-Id") Integer userId,
+    public ResponseEntity<Object> findAllOtherUsers(@RequestHeader(HEADER) Integer userId,
                                                     @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                                     @Positive @RequestParam(defaultValue = "10") Integer size) {
         log.info("getting item requests userId = {}, from = {}, size = {}", userId, from, size);

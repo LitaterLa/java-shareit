@@ -26,11 +26,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
+    private static final String HEADER = "X-Sharer-User-Id";
     private final ItemService itemService;
 
     @PostMapping
     public ItemDto create(@RequestBody NewItemRequest request,
-                          @RequestHeader("X-Sharer-User-Id") Integer ownerId) {
+                          @RequestHeader(HEADER) Integer ownerId) {
         log.info("Creating item name={}", request.getName());
         return itemService.create(request, ownerId);
     }
@@ -38,27 +39,27 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public CommentDto create(@RequestBody NewCommentRequest commentRequest,
                              @PathVariable Integer itemId,
-                             @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                             @RequestHeader(HEADER) Integer userId) {
         return itemService.createComment(commentRequest, itemId, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto update(@PathVariable Integer itemId,
                           @RequestBody UpdateItem request,
-                          @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                          @RequestHeader(HEADER) Integer userId) {
         log.info("Updating item id={}", itemId);
         return itemService.update(itemId, request, userId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDtoCommentBooking get(@PathVariable Integer itemId,
-                                     @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                     @RequestHeader(HEADER) Integer userId) {
         log.info("Getting item id={}", itemId);
         return itemService.get(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDtoCommentBooking> getUserItems(@RequestHeader("X-Sharer-User-Id") Integer ownerId) {
+    public List<ItemDtoCommentBooking> getUserItems(@RequestHeader(HEADER) Integer ownerId) {
         log.info("Getting items of user id={}", ownerId);
         return itemService.getUserItems(ownerId);
     }

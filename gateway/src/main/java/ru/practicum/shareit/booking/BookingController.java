@@ -5,6 +5,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -14,22 +15,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingState;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
 
 
-@RestController
+@Controller
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
 public class BookingController {
+    private static final String HEADER = "X-Sharer-User-Id";
     private final BookingClient bookingClient;
 
     @PostMapping
     public ResponseEntity<Object> createBookingRequest(@RequestBody @Validated NewBookingRequest booking,
-                                                       @RequestHeader("X-Sharer-User-Id") Integer bookerId) {
+                                                       @RequestHeader(HEADER) Integer bookerId) {
         log.info("Creating new booking itemId {}", booking.getItemId());
         log.info("Creating new booking item start{}", booking.getStart());
         log.info("Creating new booking item end{}", booking.getEnd());
@@ -38,7 +39,7 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> processBookingRequest(@PathVariable Integer bookingId,
-                                                        @RequestHeader("X-Sharer-User-Id") Integer ownerId,
+                                                        @RequestHeader(HEADER) Integer ownerId,
                                                         @RequestParam("approved") Boolean processable) {
         log.info("Processing booking id{}", bookingId);
         return bookingClient.updateBookingState(bookingId, ownerId, processable);
@@ -46,13 +47,13 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(@PathVariable Integer bookingId,
-                                             @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                             @RequestHeader(HEADER) Integer userId) {
         log.info("Looking for booking id{}", bookingId);
         return bookingClient.getBooking(userId, bookingId);
     }
 
     @GetMapping
-    public ResponseEntity<Object> findAllByUserId(@RequestHeader("X-Sharer-User-Id") Integer userId,
+    public ResponseEntity<Object> findAllByUserId(@RequestHeader(HEADER) Integer userId,
                                                   @RequestParam(value = "status", defaultValue = "ALL") String state,
                                                   @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                                   @Positive @RequestParam(defaultValue = "10") Integer size) {
@@ -62,7 +63,7 @@ public class BookingController {
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<Object> findAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Integer ownerId,
+    public ResponseEntity<Object> findAllByOwnerId(@RequestHeader(HEADER) Integer ownerId,
                                                    @RequestParam(value = "status", defaultValue = "ALL") String state,
                                                    @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                                    @Positive @RequestParam(defaultValue = "10") Integer size) {

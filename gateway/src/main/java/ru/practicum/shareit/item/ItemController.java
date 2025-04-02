@@ -25,39 +25,40 @@ import ru.practicum.shareit.item.dto.UpdateItemRequest;
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
+    private static final String HEADER = "X-Sharer-User-Id";
     private final ItemClient client;
 
     @PostMapping
     public ResponseEntity<Object> create(@Validated @RequestBody NewItemRequest request,
-                                         @RequestHeader("X-Sharer-User-Id") Integer ownerId) {
+                                         @RequestHeader(HEADER) Integer ownerId) {
         log.info("Creating item name={}", request.getName());
         return client.createItem(request, ownerId);
     }
 
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<Object> create(@Validated @RequestBody NewCommentRequest commentRequest,
-                             @PathVariable Integer itemId,
-                             @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                         @PathVariable Integer itemId,
+                                         @RequestHeader(HEADER) Integer userId) {
         return client.createComment(commentRequest, itemId, userId);
     }
 
     @PatchMapping("/{itemId}")
     public ResponseEntity<Object> update(@PathVariable Integer itemId,
-                          @RequestBody UpdateItemRequest request,
-                          @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                         @RequestBody UpdateItemRequest request,
+                                         @RequestHeader(HEADER) Integer userId) {
         log.info("Updating item id={}", itemId);
         return client.update(itemId, request, userId);
     }
 
     @GetMapping("/{itemId}")
     public ResponseEntity<Object> get(@PathVariable Integer itemId,
-                                     @RequestHeader("X-Sharer-User-Id") Integer userId) {
+                                      @RequestHeader(HEADER) Integer userId) {
         log.info("Getting item id={}", itemId);
         return client.get(itemId, userId);
     }
 
     @GetMapping
-    public ResponseEntity<Object> getUserItems(@RequestHeader("X-Sharer-User-Id") Integer ownerId) {
+    public ResponseEntity<Object> getUserItems(@RequestHeader(HEADER) Integer ownerId) {
         log.info("Getting items of user id={}", ownerId);
         return client.getUserItems(ownerId);
     }
